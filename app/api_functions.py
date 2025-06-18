@@ -34,7 +34,6 @@ def get_contacts(creds):
             next_page_token=people["nextPageToken"]
         except KeyError:
             break
-        print(len(data))
         data.append(people)
         
     with open('contacts.json','w') as file:
