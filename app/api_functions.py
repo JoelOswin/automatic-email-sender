@@ -29,14 +29,14 @@ def get_contacts(creds):
     data=[]
     next_page_token=None
     while True:
-        people = people_service.people().connections().list(resourceName='people/me',personFields='names,emailAddresses,addresses',pageToken=next_page_token).execute()
+        people = people_service.people().connections().list(resourceName='people/me',personFields='names,emailAddresses,addresses,phoneNumbers,biographies',pageToken=next_page_token).execute()
         try:
             next_page_token=people["nextPageToken"]
         except KeyError:
             break
         data.append(people)
         
-    with open('contacts.json','w') as file:
+    with open('unformatted_contacts.json','w',encoding='utf-8') as file:
         json.dump(data,file,indent=4)
-        print('Created file contacts.json successfully')
+        print('Created file unformatted_contacts.json successfully')
     return 0
