@@ -1,4 +1,16 @@
-import csv,re
+import csv,re,os,json
+
+
+def get_information():
+    if not os.path.exists('contacts.json'):
+        print("contacts.json does not exist")
+        return -1
+    contacts_unformatted=[]
+    with open('contacts.json', 'r') as file:
+        contacts_unformatted=json.load(file)
+    contacts=[]
+    for contact in contacts_unformatted:
+        pass
 
 def get_contacts(csv_file_name):
     '''Argument must be a csv file name downloaded directly from google contacts\n
