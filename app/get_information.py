@@ -1,13 +1,12 @@
 import re,os,json
 
-
 def get_information():
-    if not os.path.exists('temp.json'):
-        print("contacts.json does not exist")
+    if not os.path.exists('unformatted_contacts.json'):
+        print("unformatted_contacts.json does not exist")
         return -1
     
     contacts_unformatted=[]
-    with open('temp.json', 'r') as file:
+    with open('unformatted_contacts.json', 'r') as file:
         contacts_unformatted=json.load(file)
 
     contacts=[]
@@ -21,6 +20,8 @@ def get_information():
         for contact in list_of_contacts:
             cust={}
             if 'cust' in contact['names'][0]['displayName'].lower():
+                resouceName=contact['resourceName']
+                etag=contact['etag']
                 Cust_Name=contact['names'][0]['displayName']
                 address_full=''
                 try:
@@ -78,16 +79,22 @@ def get_information():
 
                     works=[] # works in proper format will be stored here
                     for item in unformatted_works:
-                        work={}
-                        work['type']=re.split(r'[()]+',re.findall(r'\(.*\)',item)[0])[1].strip()
-                        work['year']=re.findall(r' [0-9][0-9][0-9][0-9] ', item)[0].strip()
-                        work['cost']=re.findall(r'₹[0-9]+',item)[0].strip()
-                        works.append(work)
+                        try:
+                            work={}
+                            work['type']=re.split(r'[()]+',re.findall(r'\(.*\)',item)[0])[1].strip()
+                            work['year']=re.findall(r' [0-9][0-9][0-9][0-9] ', item)[0].strip()
+                            work['cost']=re.findall(r'\u20b9[0-9]+',item)[0].strip()
+                            works.append(work)
+                        except IndexError:
+                            works.append(item)
+                            continue
                 except KeyError:
                     pass
                 except IndexError:
                     works.append(contact['biographies'][0]['value'])
-
+                
+                cust['resourceName']=resouceName
+                cust['etag']=etag
                 cust['Cust_Name']=Cust_Name
                 cust['name']=name
                 cust['area']=area
@@ -121,3 +128,4 @@ def get_information():
     with open('contacts.json','w',encoding='utf-8') as file:
         json.dump(contacts,file,indent=4)
         print("Successfully created contacts.json")
+    return 0
