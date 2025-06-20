@@ -24,7 +24,7 @@ def authenticate(CLIENT_FILE,SCOPES:list,purpose:str):
             token.write(creds.to_json())
     return creds
 
-def get_contacts(creds):
+def fetch_contacts(creds):
     people_service=build('people','v1', credentials=creds)
 
     data=[]
@@ -46,7 +46,7 @@ def get_contacts(creds):
     with open('unformatted_contacts.json','w',encoding='utf-8') as file:
         json.dump(data,file,indent=4)
         print('Created file unformatted_contacts.json successfully')
-    return data
+    return 0
 
 def send_email(creds,create_message):
     send_message=None
