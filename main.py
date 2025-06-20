@@ -4,6 +4,7 @@ from app.get_information import get_information
 from app.create_message import create_message
 from datetime import date
 import json
+import time
 
 # fetch contacts
 creds = authenticate('people_CLIENT_FILE.json',['https://www.googleapis.com/auth/contacts'],'people')
@@ -34,3 +35,4 @@ for contact in contacts:
     send_email(creds_gmail,create_message(contact))
     update_contact_email(creds_people,contact)
 print('Success! Emails sent and contacts updated successfully')
+time.sleep(20)
