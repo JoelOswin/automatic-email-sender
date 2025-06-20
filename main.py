@@ -23,16 +23,14 @@ contacts=[]
 with open('contacts.json','r',encoding='utf-8') as file:
     contacts=json.load(file)
 
-messages=[]
+
+creds_gmail=authenticate('gmail_CLIENT_FILE.json',['https://mail.google.com/'],'gmail')
+creds_people=authenticate('people_CLIENT_FILE.json',['https://www.googleapis.com/auth/contacts'],'people')
+
 for contact in contacts:
     if not contact['email']:
         continue
     if (date.today().year-contact['email_sent_year'])<2:
         continue
-    messages.append((contact,create_message(contact)))
-
-creds_gmail=authenticate('gmail_CLIENT_FILE.json',['https://mail.google.com/'],'gmail')
-creds_people=authenticate('people_CLIENT_FILE.json',['https://www.googleapis.com/auth/contacts'],'people')
-for message in messages:
-    send_email(creds_gmail,message[1])
-    #update_contact_email(creds_people,message[0])
+    send_email(creds_gmail,create_message(contact))
+    update_contact_email(creds_people,contact)

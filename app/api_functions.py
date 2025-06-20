@@ -7,6 +7,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from datetime import date
 import time
+import sys
 
 def authenticate(CLIENT_FILE,SCOPES:list,purpose:str):
     creds=None
@@ -55,6 +56,7 @@ def send_email(creds,create_message):
         print(f'Message Id: {send_message["id"]}')
     except HttpError as error:
         print(f"An error occurred: {error}")
+        sys.exit(1)
     return send_message
 
 def update_contact_email(creds,contact:dict):

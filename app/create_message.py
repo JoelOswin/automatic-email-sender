@@ -2,8 +2,9 @@ import re,os
 
 import markdown
 import base64
-from email.mime.image import MIMEImage
+from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 img_path='images/'
 
@@ -24,18 +25,27 @@ def create_message(cust_dict,From_address='chennaiservice4@gmail.com'):
         return -1
     
     CONST_rupee='&#x20B9;'
+    name_present=True
+    if not cust_dict['name']:
+        name_present=False
+    
+    name=''
+    if not name_present:
+        if re.search(r'[Cc]ust  ?(\w+)',cust_dict['Cust_Name'])[1].lower()=='dr' or re.search(r'[Cc]ust  ?(\w+)',cust_dict['Cust_Name'])[1].lower()=='captain' or len(re.search(r'[Cc]ust  ?(\w+)',cust_dict['Cust_Name'])[1])==1:
+            name=re.search(r'[Cc]ust  ?(\w+[ \.&]+\w+)',cust_dict['Cust_Name'])[1]
+        else:
+            name=re.search(r'[Cc]ust  ?(\w+)',cust_dict['Cust_Name'])[1]
 
     phone_numbers=[]
     for ph in cust_dict['phone_numbers']:
         phone_numbers.append(ph['number'])
-    if cust_dict['name']:
-        message_content=f'<b>Dear {cust_dict['name']}</b><br>' + ' \ '.join(phone_numbers) + '<br><br>'
+    if name_present:
+        message_content=f'<b>Dear {cust_dict['name']}</b><br>' + r' \ '.join(phone_numbers) + '<br><br>'
     else:
-        print(cust_dict['Cust_Name'])
-        try:
-            message_content=f"<b>Dear Customer {re.findall(r'[Cc]ust \w+',cust_dict['Cust_Name'])[0].split('cust ')[1]}</b><br>" + ' \ '.join(phone_numbers) + '<br><br>'
-        except IndexError:
-            message_content=f"<b>Dear Customer</b><br>" + ' \ '.join(phone_numbers) + '<br><br>'
+        if re.search(r'[Cc]ust  ?(\w+)',cust_dict['Cust_Name'])[1].lower()=='dr':
+            message_content=f'<b>Dear {name}</b><br>' + r' \ '.join(phone_numbers) + '<br><br>'
+        else:
+            message_content=f'<b>Dear Customer {name}</b><br>' + r' \ '.join(phone_numbers) + '<br><br>'
 
     work_given=True
     for work in cust_dict['works']:
@@ -50,12 +60,10 @@ def create_message(cust_dict,From_address='chennaiservice4@gmail.com'):
     elif 'mr' in cust_dict['name'].lower():
         message_content+='Sir, '
     else:
-        if cust_dict['name']:
+        if name_present:
             message_content+=cust_dict['name'] + ', '
-        try:
-            message_content+=re.findall(r'Cust  ?\w+',cust_dict['Cust_Name'])[0].split('Cust ')[1] + ', '
-        except IndexError:
-            message_content+=re.findall(r'cust  ?\w+',cust_dict['Cust_Name'])[0].lower().split('cust ')[1] + ', '
+        else:
+            message_content+=name + ', '
 
     if work_given:
         message_content+='Thank you very much for'
@@ -122,7 +130,7 @@ R.Rosalind Devotta'''
 <tr style="border: 1px solid black; padding: 10px;">
 <td style="border: 1px solid black; padding: 10px; text-align: center;">3</td>
 <td style="border: 1px solid black; padding: 10px; text-align: left;"><b>Blinds</b></td>
-<td style="border: 1px solid black; padding: 10px; text-align: center;">Roman, vertical, roller, PVC, Bamboo Honey comb blinds (A/ C prevention)</td>
+<td style="border: 1px solid black; padding: 10px; text-align: center;">Roman, vertical, roller, PVC, Bamboo, Honey comb blinds (A/ C prevention)</td>
 </tr>
 <tr style="border: 1px solid black; padding: 10px;">
 <td style="border: 1px solid black; padding: 10px; text-align: center;">4</td>
@@ -155,18 +163,20 @@ R.Rosalind Devotta'''
 
     message_content=font_style + initial_msg + table_html + final_msg
 
-    msg=MIMEText(message_content,'html')
-    msg['To']='joeloswin41@gmail.com'#cust_dict['email']
+    msg=MIMEMultipart()
+    msg['To']=cust_dict['email']
     msg['From']=From_address
-    msg['Subject']='Test'
+    msg['Subject']='CHENNAI SERVICE - Reg Services Rendered'
 
-    msg.add_header('Content-Type','text/html')
-    msg.set_payload(message_content)
+    body=MIMEText(message_content,'html')
+    #msg.add_header('Content-Type','text/html')
+    #msg.set_payload(message_content)
+    msg.attach(body)
 
-    #files=os.listdir(img_path)
-    #for img in files:
-    #    with open(f'{img_path}{img}','rb') as file:
-    #        msg.add_attachment(MIMEImage(file.read(),name=os.path.basename(f'{img_path}{img}')))
+    files=os.listdir(img_path)
+    for img in files:
+        with open(f'{img_path}{img}','rb') as file:
+            msg.attach(MIMEApplication(file.read(),name=os.path.basename(f'{img_path}{img}')))
     message=None
     try:
         encoded_message = base64.urlsafe_b64encode(msg.as_bytes()).decode()
@@ -174,27 +184,6 @@ R.Rosalind Devotta'''
     except UnicodeEncodeError:
         print(f'Error:{cust_dict['Cust_Name']}')
     return message
-
-temp={
-        "Cust_Name": "Cust Shankar O 12975",
-        "name": "Mr Shankar",
-        "area": "Thambaram",
-        "email": "shankimail@gmail.com",
-        "email_sent_year": 2024,
-        "works": [
-            "In 2007 : Pending for curtains @ Kadaperi ",
-            "In 2017 : Pending for sofa relining "
-        ],
-        "address": "Mr Shankar\n9840896566\n\n56, Amar Nagar, SBI Colony, Kadaperi, Thambaram, Chennai 45. Ground Floor.\nNear MEPZ\nOpposite To EB office",
-        "phone_numbers": [
-            {
-                "number": "9840896566",
-                "status": "Not Reachable (1.8.23)+Temp out of service (4.11.24)",
-                "last_called": 2024
-            }
-        ]
-    }
-#create_message(temp)
 
 
 # obsolete:
