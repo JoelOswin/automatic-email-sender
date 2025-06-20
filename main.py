@@ -34,3 +34,4 @@ for contact in contacts:
         continue
     send_email(creds_gmail,create_message(contact))
     update_contact_email(creds_people,contact)
+print('Success! Emails sent and contacts updated successfully')
