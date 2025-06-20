@@ -56,6 +56,7 @@ def send_email(creds,create_message):
         print(f'Message Id: {send_message["id"]}')
     except HttpError as error:
         print(f"An error occurred: {error}")
+        time.sleep(20)
         sys.exit(1)
     return send_message
 
