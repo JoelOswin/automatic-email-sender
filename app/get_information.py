@@ -70,6 +70,7 @@ def get_information():
                     pass
                 
                 works=[]
+                notes=[]
                 try:
                     notes=contact['biographies'][0]['value']
                     unformatted_works=list(re.split(r'[\n]+', notes))
@@ -102,6 +103,7 @@ def get_information():
                 cust['email_sent_year']=email_sent_year
                 cust['works']=works
                 cust['address']=address_full
+                cust['unformatted_works']=notes
 
                 cust['phone_numbers']=[]
                 try:
