@@ -54,17 +54,17 @@ def send_email(creds,create_message):
         gmail_service=build('gmail','v1',credentials=creds)
         send_message = (gmail_service.users().messages().send(userId="me", body=create_message).execute())
         print(f'Message Id: {send_message["id"]}')
+        return 0
     except HttpError as error:
-        if error.resp.status == 400 and 'failedPrecondition' in str(error):
-            print(f"Precondition check failed error: {error}")
-            return 1
-        elif 'The server encountered a temporary error and could not complete your request.' in str(error):
-            print(f"{error}")
-            return 1
-        print(error)
+        if 'rateLimitExceeded' in str(error):
+            print(error)
+            sys.exit(1)
+        else:
+            print(error)
+    except Exception as error:
+        print(f"An unexpected Error occured: {error}")
         time.sleep(20)
-        sys.exit(1)
-    return send_message
+        return 1
 
 def update_contact_email(creds,contact:dict):
     people_service=build('people','v1',credentials=creds)

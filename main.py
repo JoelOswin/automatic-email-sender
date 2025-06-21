@@ -32,7 +32,7 @@ for contact in contacts:
         continue
     if (date.today().year-contact['email_sent_year'])<2:
         continue
-    send_email(creds_gmail,create_message(contact))
-    update_contact_email(creds_people,contact)
+    if send_email(creds_gmail,create_message(contact))==0:
+        update_contact_email(creds_people,contact)
 print('Success! Emails sent and contacts updated successfully')
 time.sleep(20)
