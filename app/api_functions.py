@@ -55,7 +55,13 @@ def send_email(creds,create_message):
         send_message = (gmail_service.users().messages().send(userId="me", body=create_message).execute())
         print(f'Message Id: {send_message["id"]}')
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        if error.resp.status == 400 and 'failedPrecondition' in str(error):
+            print(f"Precondition check failed error: {error}")
+            return 1
+        elif 'The server encountered a temporary error and could not complete your request.' in str(error):
+            print(f"{error}")
+            return 1
+        print(error)
         time.sleep(20)
         sys.exit(1)
     return send_message
